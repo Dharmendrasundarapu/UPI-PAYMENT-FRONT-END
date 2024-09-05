@@ -63,7 +63,7 @@ const Home = () => {
 
   const handleLogout = () => {
     setUser(null); // Clear user details from context
-    navigate("/login"); // Navigate to login page
+    navigate("/"); // Navigate to login page
   };
 
   const handleChange = (e) => {

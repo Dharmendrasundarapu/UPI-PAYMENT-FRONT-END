@@ -1,44 +1,48 @@
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { UserContext } from "../context/UserContext"; // Import UserContext
+import "../styles/Transfer.css"; // Import from your style folder
 
-const Transfer = ({ userDetails }) => {
+const Transfer = () => {
+  const { user } = useContext(UserContext); // Access the user from UserContext
   const [transferData, setTransferData] = useState([]);
 
   useEffect(() => {
     const fetchTransactionHistory = async () => {
       try {
-        if (userDetails && userDetails.phoneNumber) {
-          const response = await axios.get(`http://localhost:9090/transaction/history/${userDetails.phoneNumber}`);
+        // Check if the user is defined and has a phoneNumber
+        if (user && user.phoneNumber) {
+          const response = await axios.get(`http://localhost:9090/transaction/history/${user.phoneNumber}`);
           setTransferData(response.data);
         }
       } catch (err) {
-        console.error('Error fetching transaction history:', err);
+        console.error("Error fetching transaction history:", err);
       }
     };
 
     fetchTransactionHistory();
-  }, [userDetails]); 
+  }, [user]); // Fetch when the user changes
 
   return (
-    <>
+    <div className="transfer-container">
       <h1>Transaction History</h1>
-      <ul>
+      <div className="transaction-list">
         {transferData.length > 0 ? (
           transferData.map((transfer) => (
-            <li key={transfer.transactionId}>
-              <strong>SENDER:</strong> {transfer.senderMobileNumber}<br />
-              <strong>RECEIVER:</strong> {transfer.receiverMobileNumber}<br />
-              <strong>AMOUNT:</strong> {transfer.amount}<br />
-              <strong>Transaction Id:</strong> {transfer.transactionId}<br />
-              <strong>Transaction Date:</strong> {transfer.transactionDate}<br />
-              <strong>Status:</strong> {transfer.status}<br />
-            </li>
+            <div className="transaction-row" key={transfer.transactionId}>
+              <span className="transaction-item"><strong>SENDER:</strong> {transfer.senderMobileNumber}</span>
+              <span className="transaction-item"><strong>RECEIVER:</strong> {transfer.receiverMobileNumber}</span>
+              <span className="transaction-item"><strong>AMOUNT:</strong> {transfer.amount}</span>
+              <span className="transaction-item"><strong>ID:</strong> {transfer.transactionId}</span>
+              <span className="transaction-item"><strong>DATE:</strong> {transfer.transactionDate}</span>
+              <span className="transaction-item"><strong>STATUS:</strong> {transfer.status}</span>
+            </div>
           ))
         ) : (
           <p>No transactions found.</p>
         )}
-      </ul>
-    </>
+      </div>
+    </div>
   );
 };
 
