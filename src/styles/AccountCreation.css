@@ -1,0 +1,50 @@
+/* styles/AccountCreation.css */
+.account-creation-form {
+    background-color: #2c3e50; /* Dark background color for a modern look */
+    color: #ecf0f1; /* Light text color for contrast */
+    border-radius: 8px; /* Rounded corners for the form */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Slightly darker shadow for depth */
+    max-width: 500px; /* Limit form width */
+    margin: 0 auto; /* Center the form horizontally */
+    padding: 20px; /* Add padding for spacing */
+}
+
+.account-creation-form h2 {
+    text-align: center; /* Center the form title */
+    color: #ecf0f1; /* Light text color for contrast */
+}
+
+.account-creation-form div {
+    margin-bottom: 15px; /* Space between form fields */
+}
+
+.account-creation-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold; /* Make labels stand out */
+    color: #ecf0f1; /* Light color for labels */
+}
+
+.account-creation-form input,
+.account-creation-form select {
+    width: 100%; /* Full width input fields */
+    padding: 10px;
+    border: 1px solid #34495e; /* Dark border for input fields */
+    border-radius: 4px; /* Rounded corners for input fields */
+    background-color: #34495e; /* Darker background for input fields */
+    color: #ecf0f1; /* Light text color for input fields */
+}
+
+.account-creation-form button {
+    background-color: #3498db; /* Primary button color */
+    color: white; /* Text color for the button */
+    border: none; /* Remove border */
+    padding: 10px 15px; /* Button padding */
+    border-radius: 4px; /* Rounded corners for the button */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 16px; /* Larger font size for readability */
+}
+
+.account-creation-form button:hover {
+    background-color: #2980b9; /* Darker button color on hover */
+}

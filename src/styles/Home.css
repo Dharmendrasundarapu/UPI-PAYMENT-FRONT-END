@@ -1,0 +1,160 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f5f5, #e0e0e0); /* Subtle gradient background */
+  border-radius: 10px; /* Rounded corners */
+}
+
+.info-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.accounts-section {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.accounts-section h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.account-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: none;
+  padding: 20px;
+  margin: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+  background: #ffffff; /* White background for cards */
+  flex: 1;
+  max-width: 300px; /* Optional: limit maximum width of cards */
+  margin: 10px auto;
+}
+
+.account-card p {
+  margin: 5px 0;
+}
+
+.account-card button {
+  background-color: #28a745; /* Green background for buttons */
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Smooth color transition */
+}
+
+.account-card button:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+.edit-form {
+  text-align: center;
+  background: #ffffff; /* White background for forms */
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+.edit-form label {
+  display: block;
+  margin-bottom: 10px;
+  color: #333; /* Dark text for labels */
+}
+
+.edit-form input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.edit-button, .cancel-button {
+  background-color: #007bff; /* Blue background for buttons */
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 5px;
+  transition: background-color 0.3s; /* Smooth color transition */
+}
+
+.edit-button:hover, .cancel-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.selected-bank {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  background: #ffffff; /* White background for the selected bank */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+/* Refined styles for Transaction History and Create Account buttons */
+.history-button, .create-account-button {
+  background-color: #ffc107; /* Yellow background for buttons */
+  color: white;
+  border: none;
+  padding: 14px 20px; /* Slightly larger padding for a comfortable button size */
+  border-radius: 8px; /* More rounded corners for a modern look */
+  cursor: pointer;
+  margin: 12px;
+  font-size: 16px; /* Larger font for readability */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth color and slight scale transition */
+}
+
+.history-button:hover, .create-account-button:hover {
+  background-color: #e0a800; /* Darker yellow on hover */
+  transform: translateY(-2px); /* Slight lift effect on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover for emphasis */
+}
+
+/* Transfer Money button styling */
+.button-container button {
+  background-color: #17a2b8; /* Teal background for buttons */
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 12px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth color and slight scale transition */
+}
+
+.button-container button:hover {
+  background-color: #138496; /* Darker teal on hover */
+  transform: translateY(-2px); /* Slight lift effect on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover for emphasis */
+}
+/* Logout button styling */
+.logout-button {
+  background-color: #dc3545; /* Red background for the logout button */
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 12px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth color and slight scale transition */
+}
+
+.logout-button:hover {
+  background-color: #c82333; /* Darker red on hover */
+  transform: translateY(-2px); /* Slight lift effect on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover for emphasis */
+}
