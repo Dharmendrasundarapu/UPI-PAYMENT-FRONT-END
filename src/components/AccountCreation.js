@@ -12,7 +12,8 @@ const AccountCreation = () => {
         accountNumber: '',
         pin: '',
         bankBalance: '100000',
-        upiPin: ''
+        upiPin: '',
+        isPrimary: false
     });
     const banks = [
         'SBI',
@@ -25,10 +26,10 @@ const AccountCreation = () => {
     const navigate = useNavigate(); // Initialize useNavigate
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setAccountData(prevState => ({
             ...prevState,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
 
@@ -44,11 +45,22 @@ const AccountCreation = () => {
         e.preventDefault();
         try {
             const response = await axios.post("http://localhost:9090/account/create", accountData);
-            // Optionally update user details in context if needed
-            setUser(prevState => ({
-                ...prevState,
-                accounts: [...prevState.accounts, response.data] // Add new account to context
-            }));
+
+            // Update user accounts and set the latest account as primary if selected
+            setUser(prevState => {
+                const updatedAccounts = prevState.accounts.map(account => ({
+                    ...account,
+                    isPrimary: accountData.isPrimary ? false : account.isPrimary // Unset other primary accounts if this is primary
+                }));
+
+                const newAccount = { ...response.data, isPrimary: accountData.isPrimary };
+
+                return {
+                    ...prevState,
+                    accounts: [...updatedAccounts, newAccount] // Add new account to context
+                };
+            });
+
             navigate('/home'); // Navigate to home page
         } catch (err) {
             console.log("Account creation failed", err);
@@ -112,6 +124,17 @@ const AccountCreation = () => {
                     onChange={handleChange}
                     required
                 />
+            </div>
+            <div>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="isPrimary"
+                        checked={accountData.isPrimary}
+                        onChange={handleChange}
+                    />
+                    Set as Primary Account
+                </label>
             </div>
             <button type="submit">Create Account</button>
         </form>

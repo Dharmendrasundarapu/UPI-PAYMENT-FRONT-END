@@ -1,92 +1,118 @@
-import React, { useState, useEffect,useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from '../context/UserContext';
 import axios from "axios";
+import '../styles/TransactionMoney.css';
 
 const TransactionMoney = () => {
-  const { user, selectedAccount, setSelectedAccount } = useContext(UserContext); // Access user and selectedAccount from context
+  const { user, selectedAccount, setSelectedAccount } = useContext(UserContext);
   const [receiverMobileNumber, setReceiverMobileNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [upiPin, setUpiPin] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
-  const [accounts, setAccounts] = useState([]);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [step, setStep] = useState(1); // Step for controlling form view
 
-  // Effect to load accounts from context or a relevant source
   useEffect(() => {
     if (user && user.accounts) {
-      setAccounts(user.accounts);
+      setBankAccounts(user.accounts);
+    } else {
+      console.log("No accounts found in UserContext.");
     }
   }, [user]);
 
+  const handleProceed = (e) => {
+    e.preventDefault();
+    if (receiverMobileNumber && selectedAccount && amount) {
+      setStep(2); // Move to the next step if all required fields are filled
+    } else {
+      setResponseMessage("Please fill in all the fields before proceeding.");
+    }
+  };
+
   const handleMoney = async (e) => {
     e.preventDefault();
+    if (user && selectedAccount && amount && upiPin) {
+      try {
+        const response = await axios.post("http://localhost:9090/transaction/transfer", {
+          senderMobileNumber: user.phoneNumber,
+          receiverMobileNumber,
+          amount,
+          upiPin,
+          fromAccount: selectedAccount,
+        });
 
-    try {
-      const response = await axios.post("http://localhost:9090/transaction/transfer", {
-        senderMobileNumber: user.mobileNumber, // Use mobile number from context
-        receiverMobileNumber,
-        amount,
-        upiPin,
-        fromAccount: selectedAccount, // Include selected account in request
-      });
-
-      setResponseMessage(response.data.message || "Transaction successful.");
-    } catch (error) {
-      setResponseMessage("Transaction failed. Please try again.");
+        console.log(response.data);
+        setResponseMessage(response.data.message || "Transaction successful.");
+        setStep(1); // Reset to the first step after successful transaction
+        setReceiverMobileNumber("");
+        setAmount("");
+        setUpiPin("");
+        setSelectedAccount("");
+      } catch (error) {
+        setResponseMessage("Transaction failed. Please try again.");
+      }
+    } else {
+      setResponseMessage("Please fill in all fields before sending.");
     }
   };
 
   return (
-    <div>
+    <div className="transaction-container">
       <h2>Transfer Money</h2>
-      <form onSubmit={handleMoney}>
-        <div>
-          <label>Receiver Mobile Number:</label>
-          <input
-            type="text"
-            value={receiverMobileNumber}
-            onChange={(e) => setReceiverMobileNumber(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Amount:</label>
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>UPI Pin:</label>
-          <input
-            type="password"
-            value={upiPin}
-            onChange={(e) => setUpiPin(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Select Account:</label>
-          <select
-            value={selectedAccount}
-            onChange={(e) => setSelectedAccount(e.target.value)}
-            required
-          >
-            <option value="">Select an account</option>
-            {accounts.length > 0 ? (
-              accounts.map((account) => (
+      {step === 1 && (
+        <form onSubmit={handleProceed}>
+          <div className="form-group">
+            <label>Receiver Mobile Number:</label>
+            <input
+              type="text"
+              value={receiverMobileNumber}
+              onChange={(e) => setReceiverMobileNumber(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Select Account:</label>
+            <select
+              value={selectedAccount}
+              onChange={(e) => setSelectedAccount(e.target.value)}
+              required
+            >
+              <option value="">Select an account</option>
+              {bankAccounts.map((account) => (
                 <option key={account.id} value={account.id}>
-                  {account.name} - {account.balance}
+                  {account.bankName} - {account.balance}
                 </option>
-              ))
-            ) : (
-              <option value="">No accounts available</option>
-            )}
-          </select>
-        </div>
-        <button type="submit">Transfer</button>
-      </form>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Amount:</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="proceed-btn">Proceed</button>
+        </form>
+      )}
+
+      {step === 2 && (
+        <form onSubmit={handleMoney}>
+          <div className="form-group">
+            <label>UPI Pin:</label>
+            <input
+              type="password"
+              value={upiPin}
+              onChange={(e) => setUpiPin(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="send-btn">Send</button>
+        </form>
+      )}
+
       {responseMessage && <p>{responseMessage}</p>}
     </div>
   );

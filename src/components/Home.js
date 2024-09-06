@@ -1,40 +1,25 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
 import '../styles/Home.css';
 
 const Home = () => {
-  const { user, setUser, selectedAccount, setSelectedAccount } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user || {});
   const [accounts, setAccounts] = useState([]);
+  const [balance, setBalance] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [upiPin, setUpiPin] = useState('');
+  const [showPinForm, setShowPinForm] = useState(null); // Use null to indicate no account selected for PIN input
   const navigate = useNavigate();
 
-  // Set form data and accounts when user changes
   useEffect(() => {
     if (user) {
       setFormData(user);
       setAccounts(user.accounts || []);
     }
   }, [user]);
-
-  // Fetch user details only once or when there are no accounts
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const response = await axios.get(`http://localhost:9090/user/${user.id}`);
-        setUser(response.data);
-        setAccounts(response.data.accounts || []);
-      } catch (err) {
-        console.error('Failed to fetch user details:', err);
-      }
-    };
-
-    if (user && !accounts.length) {
-      fetchUserDetails();
-    }
-  }, [user, accounts.length, setUser]);
 
   if (!user) {
     return <h1>Please login or register to view this page</h1>;
@@ -62,8 +47,8 @@ const Home = () => {
   };
 
   const handleLogout = () => {
-    setUser(null); // Clear user details from context
-    navigate("/"); // Navigate to login page
+    setUser(null);
+    navigate("/");
   };
 
   const handleChange = (e) => {
@@ -75,19 +60,42 @@ const Home = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.put(`http://localhost:9090/user/${user.id}`, formData);
-      console.log("Update response:", response.data);
-      setUser(response.data);
-      setIsEditing(false);
-      navigate("/home");
-    } catch (err) {
-      console.error('Failed to update user:', err);
-    }
+    // Perform your update operation here if needed
+    setUser(formData);
+    setIsEditing(false);
+    navigate("/home");
   };
 
-  const handleBankSelection = (account) => {
+  const handleCheckBalance = (account) => {
     setSelectedAccount(account);
+    setShowPinForm(account.accountNumber); // Set account number to show PIN form for that account
+    setBalance(null); // Clear previous balance
+  };
+
+  const handlePinChange = (e) => {
+    setUpiPin(e.target.value);
+  };
+
+  const handlePinSubmit = (e) => {
+    e.preventDefault();
+
+    if (selectedAccount) {
+      // Verify UPI PIN from UserContext
+      if (user.upiPin === upiPin) {
+        console.log("User UPI PIN: ", user.upiPin);
+        console.log("Entered UPI PIN: ", upiPin);
+
+        const account = user.accounts.find(acc => acc.accountNumber === selectedAccount.accountNumber);
+        if (account) {
+          setBalance(account.bankBalance); // Use `bankBalance` property in your account object
+        } else {
+          alert("Account not found.");
+        }
+      } else {
+        alert("Incorrect UPI PIN");
+      }
+      setShowPinForm(null); // Hide PIN form after checking balance or if PIN is incorrect
+    }
   };
 
   return (
@@ -98,24 +106,41 @@ const Home = () => {
         <div className="info-section">
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Phone Number:</strong> {user.phoneNumber}</p>
-          <p><strong>Address:</strong> {user.address}</p>
+          
+          {accounts.length > 0 ? (
+            accounts.map((account, index) => (
+              <div key={index} className="account-card">
+                <p><strong>Bank Name:</strong> {account.bankName}</p>
+                <p><strong>Account Number:</strong> {account.accountNumber}</p>
 
-          <div className="accounts-section">
-            <h3>Bank Accounts:</h3>
-            {accounts.length > 0 ? (
-              accounts.map((account, index) => (
-                <div key={index} className="account-card">
-                  <p><strong>Bank Name:</strong> {account.bankName}</p>
-                  <p><strong>Account Number:</strong> {account.accountNumber}</p>
-                  <p><strong>Bank Balance:</strong> {account.bankBalance}</p>
-                  <p><strong>Transaction Limit:</strong> {account.transactionLimit}</p>
-                  <button onClick={() => handleBankSelection(account)}>Select Bank</button>
-                </div>
-              ))
-            ) : (
-              <p>No bank accounts available.</p>
-            )}
-          </div>
+                <button onClick={() => handleCheckBalance(account)}>Check Balance</button>
+                
+                {showPinForm === account.accountNumber && (
+                  <form onSubmit={handlePinSubmit} className="pin-form">
+                    <label>
+                      Enter UPI PIN:
+                      <input
+                        type="password"
+                        value={upiPin}
+                        onChange={handlePinChange}
+                        required
+                      />
+                    </label><br />
+                    <button type="submit" className="submit-pin-button">Submit</button>
+                  </form>
+                )}
+                
+                {balance !== null && showPinForm === null && selectedAccount?.accountNumber === account.accountNumber && (
+                  <div className="balance-info">
+                    <h3>Account Balance:</h3>
+                    <p><strong>Balance:</strong> {balance}</p>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No bank accounts available.</p>
+          )}
 
           <button onClick={handleEditClick} className="edit-button">Edit</button>
         </div>
@@ -157,7 +182,7 @@ const Home = () => {
         <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
 
-      {selectedAccount && (
+      {selectedAccount && showPinForm === null && (
         <div className="selected-account">
           <h3>Selected Bank:</h3>
           <p><strong>Bank Name:</strong> {selectedAccount.bankName}</p>

@@ -19,12 +19,7 @@ function App() {
                         <Route path="/home" element={<Home />} />
                         <Route path="/send" element={<TransactionMoney/>}/>
                         <Route path="/accCreate" element={<AccountCreation />} />
-                        <Route 
-                            path="/history" 
-                            element={
-                              <Transfer/>
-                            } 
-                        />
+                        <Route path="/history" element={<Transfer/>}/>
                     </Routes>
                 </Router>
             </UserProvider>
