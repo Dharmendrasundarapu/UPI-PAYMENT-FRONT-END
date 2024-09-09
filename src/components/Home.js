@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
+import axios from 'axios';  // Import axios
 import '../styles/Home.css';
 
 const Home = () => {
@@ -31,7 +32,27 @@ const Home = () => {
 
   const handleCancelClick = () => {
     setIsEditing(false);
-    setFormData(user);
+    setFormData(user); // Revert to original user data
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      // Assume there's an API endpoint to update user details
+      await axios.put(`http://localhost:9090/user/update`, formData);
+      setUser(formData);
+      setIsEditing(false);
+      navigate("/home");
+    } catch (error) {
+      alert("Error updating user details: " + (error.response?.data?.message || error.message));
+    }
   };
 
   const handleHistory = () => {
@@ -51,50 +72,45 @@ const Home = () => {
     navigate("/");
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    // Perform your update operation here if needed
-    setUser(formData);
-    setIsEditing(false);
-    navigate("/home");
-  };
-
   const handleCheckBalance = (account) => {
     setSelectedAccount(account);
-    setShowPinForm(account.accountNumber); // Set account number to show PIN form for that account
-    setBalance(null); // Clear previous balance
+    setShowPinForm(account.accountNumber);
+    setBalance(null);
   };
 
   const handlePinChange = (e) => {
     setUpiPin(e.target.value);
   };
 
-  const handlePinSubmit = (e) => {
+  const handlePinSubmit = async (e) => {
     e.preventDefault();
 
     if (selectedAccount) {
-      // Verify UPI PIN from UserContext
-      if (user.upiPin === upiPin) {
-        console.log("User UPI PIN: ", user.upiPin);
-        console.log("Entered UPI PIN: ", upiPin);
+      try {
+        // Use query parameters to pass UPI PIN
+        const response = await axios.get(`http://localhost:9090/account/upiPin`, {
+          params: { upiPin }  // Pass the entered UPI PIN as a query parameter
+        });
 
-        const account = user.accounts.find(acc => acc.accountNumber === selectedAccount.accountNumber);
-        if (account) {
-          setBalance(account.bankBalance); // Use `bankBalance` property in your account object
+        // Assuming the API response structure is as shown
+        const { bankBalance } = response.data;
+
+        // Update balance and the UPI PIN in UserContext
+        setBalance(bankBalance);
+        setUser((prevUser) => ({
+          ...prevUser,
+          upiPin: upiPin  // Update the UPI PIN in the context with the one entered by the user
+        }));
+
+        setShowPinForm(null);  // Hide the PIN form after successful verification
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+        if (error.response) {
+          alert("Error fetching balance: " + (error.response.data.message || error.message));
         } else {
-          alert("Account not found.");
+          alert("Error fetching balance: " + error.message);
         }
-      } else {
-        alert("Incorrect UPI PIN");
       }
-      setShowPinForm(null); // Hide PIN form after checking balance or if PIN is incorrect
     }
   };
 
@@ -106,7 +122,7 @@ const Home = () => {
         <div className="info-section">
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Phone Number:</strong> {user.phoneNumber}</p>
-          
+
           {accounts.length > 0 ? (
             accounts.map((account, index) => (
               <div key={index} className="account-card">
@@ -114,7 +130,7 @@ const Home = () => {
                 <p><strong>Account Number:</strong> {account.accountNumber}</p>
 
                 <button onClick={() => handleCheckBalance(account)}>Check Balance</button>
-                
+
                 {showPinForm === account.accountNumber && (
                   <form onSubmit={handlePinSubmit} className="pin-form">
                     <label>
@@ -129,7 +145,7 @@ const Home = () => {
                     <button type="submit" className="submit-pin-button">Submit</button>
                   </form>
                 )}
-                
+
                 {balance !== null && showPinForm === null && selectedAccount?.accountNumber === account.accountNumber && (
                   <div className="balance-info">
                     <h3>Account Balance:</h3>
@@ -147,30 +163,26 @@ const Home = () => {
       ) : (
         <form onSubmit={handleSave} className="edit-form">
           <label>
-            First Name:
-            <input type="text" name="firstName" value={formData.firstName || ''} onChange={handleChange} required />
-          </label><br />
-          <label>
-            Last Name:
-            <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleChange} required />
-          </label><br />
-          <label>
-            Address:
-            <input type="text" name="address" value={formData.address || ''} onChange={handleChange} required />
+            Email:
+            <input
+              type="email"
+              name="email"
+              value={formData.email || ''}
+              onChange={handleChange}
+              required
+            />
           </label><br />
           <label>
             Phone Number:
-            <input type="text" name="phoneNumber" value={formData.phoneNumber || ''} onChange={handleChange} required />
+            <input
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber || ''}
+              onChange={handleChange}
+              required
+            />
           </label><br />
-          <label>
-            Email:
-            <input type="email" name="email" value={formData.email || ''} onChange={handleChange} required />
-          </label><br />
-          <label>
-            Password:
-            <input type="password" name="password" value={formData.password || ''} onChange={handleChange} required />
-          </label><br />
-          <button type='submit' className="edit-button">Save</button>
+          <button type="submit" className="save-button">Save</button>
           <button type="button" onClick={handleCancelClick} className="cancel-button">Cancel</button>
         </form>
       )}
@@ -181,14 +193,6 @@ const Home = () => {
         <button onClick={handleMoney}>Transfer Money</button>
         <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
-
-      {selectedAccount && showPinForm === null && (
-        <div className="selected-account">
-          <h3>Selected Bank:</h3>
-          <p><strong>Bank Name:</strong> {selectedAccount.bankName}</p>
-          <p><strong>Account Number:</strong> {selectedAccount.accountNumber}</p>
-        </div>
-      )}
     </div>
   );
 };
