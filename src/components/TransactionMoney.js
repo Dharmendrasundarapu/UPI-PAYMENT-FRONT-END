@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from '../context/UserContext';
 import axios from "axios";
 import '../styles/TransactionMoney.css';
+import { useNavigate } from "react-router-dom";
 
 const TransactionMoney = () => {
   const { user, selectedAccount, setSelectedAccount } = useContext(UserContext);
@@ -11,6 +12,7 @@ const TransactionMoney = () => {
   const [responseMessage, setResponseMessage] = useState("");
   const [bankAccounts, setBankAccounts] = useState([]);
   const [step, setStep] = useState(1); // Step for controlling form view
+  const navigate = useNavigate(); // Use it as a function
 
   useEffect(() => {
     if (user && user.accounts) {
@@ -33,7 +35,7 @@ const TransactionMoney = () => {
     e.preventDefault();
     if (user && selectedAccount && amount && upiPin) {
       try {
-        const response = await axios.post("http://localhost:9090/transaction/transfer", {
+        const response = await axios.post("http://localhost:8080/transaction/initiateTransfer", {
           senderMobileNumber: user.phoneNumber,
           receiverMobileNumber,
           amount,
@@ -48,6 +50,8 @@ const TransactionMoney = () => {
         setAmount("");
         setUpiPin("");
         setSelectedAccount("");
+        navigate("/home"); // Navigate to home page after successful transaction
+        
       } catch (error) {
         setResponseMessage("Transaction failed. Please try again.");
       }
