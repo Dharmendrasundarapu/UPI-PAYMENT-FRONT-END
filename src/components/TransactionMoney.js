@@ -24,8 +24,15 @@ const TransactionMoney = () => {
 
   const handleProceed = (e) => {
     e.preventDefault();
+
+    const transactionLimit = 10000; // Set the transaction limit
+
     if (receiverMobileNumber && selectedAccount && amount) {
-      setStep(2); // Move to the next step if all required fields are filled
+      if (parseFloat(amount) > transactionLimit) {
+        setResponseMessage(`Transaction limit of ${transactionLimit} exceeded. Please enter a smaller amount.`);
+      } else {
+        setStep(2); // Move to the next step if all required fields are filled and amount is valid
+      }
     } else {
       setResponseMessage("Please fill in all the fields before proceeding.");
     }

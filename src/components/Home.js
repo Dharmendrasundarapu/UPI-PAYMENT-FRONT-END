@@ -81,38 +81,50 @@ const Home = () => {
   const handlePinChange = (e) => {
     setUpiPin(e.target.value);
   };
-
   const handlePinSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (selectedAccount) {
       try {
-        // Use query parameters to pass UPI PIN
+        // Pass the UPI PIN and account number to the backend
         const response = await axios.get(`http://localhost:9090/account/upiPin`, {
-          params: { upiPin }  // Pass the entered UPI PIN as a query parameter
+          params: {
+            upiPin,            // Entered UPI PIN
+            accountNumber: selectedAccount.accountNumber  // Selected account number
+          }
         });
-
-        // Assuming the API response structure is as shown
-        const { bankBalance } = response.data;
-
-        // Update balance and the UPI PIN in UserContext
-        setBalance(bankBalance);
-        setUser((prevUser) => ({
-          ...prevUser,
-          upiPin: upiPin  // Update the UPI PIN in the context with the one entered by the user
-        }));
-
-        setShowPinForm(null);  // Hide the PIN form after successful verification
-      } catch (error) {
-        console.error('Error fetching balance:', error);
-        if (error.response) {
-          alert("Error fetching balance: " + (error.response.data.message || error.message));
+  
+        // Assuming the API response structure is as follows
+        const { bankBalance, upiPin: correctUpiPin } = response.data;
+  
+        console.log(`Entered UPI PIN: ${upiPin}`);
+        console.log(`Correct UPI PIN: ${correctUpiPin}`);
+  
+        if (upiPin === String(correctUpiPin)) {  // Ensure comparison is done with string
+          // Update balance and the UPI PIN in UserContext
+          setBalance(bankBalance);
+          setUser((prevUser) => ({
+            ...prevUser,
+            upiPin: upiPin  // Optionally update the UPI PIN in context
+          }));
+  
+          setShowPinForm(null);  // Hide the PIN form after successful verification
         } else {
-          alert("Error fetching balance: " + error.message);
+          alert("Wrong UPI PIN for the selected account.");
+          setBalance(null);  // Clear balance display
+          setUpiPin('');  // Clear UPI PIN field
+        }
+      } catch (error) {
+        console.error('Error verifying PIN:', error);
+        if (error.response) {
+          alert("Error verifying PIN: " + (error.response.data.message || error.message));
+        } else {
+          alert("Error verifying PIN: " + error.message);
         }
       }
     }
   };
+  
 
   return (
     <div className="home-container">
